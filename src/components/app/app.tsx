@@ -12,7 +12,7 @@ import {
 import { Modal, OrderInfo, IngredientDetails } from '@components';
 import '../../index.css';
 import styles from './app.module.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 import { AppHeader } from '@components';
 import { ProtectedRoute } from '../ProtectedRoute';
@@ -23,15 +23,20 @@ import {
   selectIsAuthenticated,
   getUser,
   init,
-  closeModal
+  closeModal,
+  selectIsModalOpen
 } from '../../slices/storeSlice';
 import { useEffect } from 'react';
 import { getCookie, deleteCookie } from '../../utils/cookie';
+import { useLocation } from 'react-router-dom';
 
 const App = () => {
   const dispatch = store.dispatch;
   const token = getCookie('accessToken');
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isModalOpen = useSelector(selectIsModalOpen);
+  const location = useLocation();
+  const backgroundLocation = location.state?.backgroundLocation;
 
   useEffect(() => {
     if (!isAuthenticated && token) {
@@ -57,70 +62,72 @@ const App = () => {
 
   return (
     <div className={styles.app}>
-      <Router>
-        <AppHeader />
+      <AppHeader />
+      <Routes location={backgroundLocation || location}>
+        <Route path='/' element={<ConstructorPage />} />
+        <Route path='/feed' element={<Feed />} />
+        <Route
+          path='/login'
+          element={
+            <ProtectedRoute notLoggedIn>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute notLoggedIn>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute notLoggedIn>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute notLoggedIn>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route path='*' element={<NotFound404 />} />
+        <Route path='/feed/:number' element={<OrderInfo />} />
+        <Route path='/ingredients/:id' element={<IngredientDetails />} />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      {isModalOpen && backgroundLocation && (
         <Routes>
-          <Route path='/' element={<ConstructorPage />} />
-          <Route path='/feed' element={<Feed />} />
-          <Route
-            path='/login'
-            element={
-              <ProtectedRoute notLoggedIn>
-                <Login />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/register'
-            element={
-              <ProtectedRoute notLoggedIn>
-                <Register />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/forgot-password'
-            element={
-              <ProtectedRoute notLoggedIn>
-                <ForgotPassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/reset-password'
-            element={
-              <ProtectedRoute notLoggedIn>
-                <ResetPassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/profile'
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/profile/orders'
-            element={
-              <ProtectedRoute>
-                <ProfileOrders />
-              </ProtectedRoute>
-            }
-          />
-          <Route path='*' element={<NotFound404 />} />
-          <Route path='/feed/:number' element={<OrderInfo />} />
-          <Route path='/ingredients/:id' element={<IngredientDetails />} />
-          <Route
-            path='/profile/orders/:number'
-            element={
-              <ProtectedRoute>
-                <ProfileOrders />
-              </ProtectedRoute>
-            }
-          />
           <Route
             path='/feed/:number'
             element={
@@ -161,7 +168,7 @@ const App = () => {
             }
           />
         </Routes>
-      </Router>
+      )}
     </div>
   );
 };
