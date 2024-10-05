@@ -8,7 +8,9 @@ import {
   registerUserApi,
   TRegisterData,
   logoutApi,
-  updateUserApi
+  updateUserApi,
+  loginUserApi,
+  resetPasswordApi
 } from '@api';
 import { TIngredient, TOrder } from '../utils/types';
 
@@ -32,6 +34,7 @@ interface StoreState {
   total: number;
   totalToday: number;
   isInit: boolean;
+  error: string | undefined;
 }
 
 const initialState: StoreState = {
@@ -55,7 +58,8 @@ const initialState: StoreState = {
   orders: [],
   total: 0,
   totalToday: 0,
-  isInit: false
+  isInit: false,
+  error: undefined
 };
 
 export const fetchIngredients = createAsyncThunk(
@@ -77,6 +81,12 @@ export const getUser = createAsyncThunk('user/getUser', async () =>
   getUserApi()
 );
 
+export const loginUser = createAsyncThunk(
+  'user/login',
+  async (data: { email: string; password: string }) =>
+    loginUserApi({ email: data.email, password: data.password })
+);
+
 export const registerNewUser = createAsyncThunk(
   'user/register',
   async (data: TRegisterData) => registerUserApi(data)
@@ -89,6 +99,10 @@ export const logOutUser = createAsyncThunk('user/logout', async () => {
 export const updateUser = createAsyncThunk(
   'user/update',
   async (user: TRegisterData) => updateUserApi(user)
+);
+export const resetPassword = createAsyncThunk(
+  'user/resetPassword',
+  async (data: { password: string; token: string }) => resetPasswordApi(data)
 );
 
 export const storeSlice = createSlice({
@@ -146,6 +160,9 @@ export const storeSlice = createSlice({
     },
     init(state) {
       state.isInit = true;
+    },
+    setError(state, action) {
+      state.error = action.payload;
     }
   },
   selectors: {
@@ -158,6 +175,7 @@ export const storeSlice = createSlice({
     selectIsAuthenticated: (state) => state.isAuthenticated,
     selectUserOrders: (state) => state.userOrders,
     selectUser: (state) => state.user,
+    selectError: (state) => state.error,
     selectOrders: (state) => state.orders,
     selectTotal: (state) => state.total,
     selectTotalToday: (state) => state.totalToday,
@@ -207,8 +225,20 @@ export const storeSlice = createSlice({
         state.user.name = action.payload.user.name;
         state.user.email = action.payload.user.email;
       })
-      .addCase(getUser.rejected, (state) => {
+      .addCase(getUser.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.error.message!;
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(loginUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message!;
       })
       .addCase(fetchUsersOrders.pending, (state) => {
         state.isLoading = true;
@@ -227,8 +257,9 @@ export const storeSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
       })
-      .addCase(registerNewUser.rejected, (state) => {
+      .addCase(registerNewUser.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.error.message!;
       })
       .addCase(logOutUser.pending, (state) => {
         state.isLoading = true;
@@ -240,6 +271,16 @@ export const storeSlice = createSlice({
       })
       .addCase(logOutUser.rejected, (state) => {
         state.isLoading = false;
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message!;
       });
   }
 });
@@ -257,7 +298,8 @@ export const {
   selectTotalToday,
   selectConstructorItems,
   selectOrderRequest,
-  selectIsInit
+  selectIsInit,
+  selectError
 } = storeSlice.selectors;
 export const {
   addIngredient,
@@ -267,7 +309,8 @@ export const {
   moveItemDown,
   resetOrder,
   deleteItem,
-  init
+  init,
+  setError
 } = storeSlice.actions;
 
 export default storeSlice.reducer;

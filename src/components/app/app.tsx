@@ -19,7 +19,6 @@ import { ProtectedRoute } from '../ProtectedRoute';
 import store, { useSelector } from '../../services/store';
 import {
   fetchIngredients,
-  fetchFeed,
   selectIsAuthenticated,
   getUser,
   init,
@@ -36,7 +35,7 @@ const App = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isModalOpen = useSelector(selectIsModalOpen);
   const location = useLocation();
-  const backgroundLocation = location.state?.backgroundLocation;
+  const backgroundLocation = location.state?.background;
 
   useEffect(() => {
     if (!isAuthenticated && token) {
@@ -126,13 +125,14 @@ const App = () => {
           }
         />
       </Routes>
+
       {isModalOpen && backgroundLocation && (
         <Routes>
           <Route
             path='/feed/:number'
             element={
               <Modal
-                title='Modal Title'
+                title='Заказ'
                 onClose={() => {
                   dispatch(closeModal());
                 }}
@@ -145,7 +145,7 @@ const App = () => {
             path='/ingredients/:id'
             element={
               <Modal
-                title='Modal Title'
+                title='Детали ингредиента'
                 onClose={() => {
                   dispatch(closeModal());
                 }}
@@ -157,14 +157,16 @@ const App = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal
-                title='Modal Title'
-                onClose={() => {
-                  dispatch(closeModal());
-                }}
-              >
-                <OrderInfo />
-              </Modal>
+              <ProtectedRoute>
+                <Modal
+                  title='Мой заказ'
+                  onClose={() => {
+                    dispatch(closeModal());
+                  }}
+                >
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
             }
           />
         </Routes>
