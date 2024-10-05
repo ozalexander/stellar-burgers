@@ -201,9 +201,11 @@ export const storeSlice = createSlice({
       .addCase(getUser.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getUser.fulfilled, (state) => {
+      .addCase(getUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
+        state.user.name = action.payload.user.name;
+        state.user.email = action.payload.user.email;
       })
       .addCase(getUser.rejected, (state) => {
         state.isLoading = false;

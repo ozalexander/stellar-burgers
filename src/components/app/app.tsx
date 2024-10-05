@@ -22,7 +22,8 @@ import {
   fetchFeed,
   selectIsAuthenticated,
   getUser,
-  init
+  init,
+  closeModal
 } from '../../slices/storeSlice';
 import { useEffect } from 'react';
 import { getCookie, deleteCookie } from '../../utils/cookie';
@@ -52,7 +53,6 @@ const App = () => {
 
   useEffect(() => {
     dispatch(fetchIngredients());
-    dispatch(fetchFeed());
   }, []);
 
   return (
@@ -111,10 +111,25 @@ const App = () => {
             }
           />
           <Route path='*' element={<NotFound404 />} />
+          <Route path='/feed/:number' element={<OrderInfo />} />
+          <Route path='/ingredients/:id' element={<IngredientDetails />} />
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
+                <ProfileOrders />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path='/feed/:number'
             element={
-              <Modal title='Modal Title' onClose={() => {}}>
+              <Modal
+                title='Modal Title'
+                onClose={() => {
+                  dispatch(closeModal());
+                }}
+              >
                 <OrderInfo />
               </Modal>
             }
@@ -122,7 +137,12 @@ const App = () => {
           <Route
             path='/ingredients/:id'
             element={
-              <Modal title='Modal Title' onClose={() => {}}>
+              <Modal
+                title='Modal Title'
+                onClose={() => {
+                  dispatch(closeModal());
+                }}
+              >
                 <IngredientDetails />
               </Modal>
             }
@@ -130,7 +150,12 @@ const App = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal title='Modal Title' onClose={() => {}}>
+              <Modal
+                title='Modal Title'
+                onClose={() => {
+                  dispatch(closeModal());
+                }}
+              >
                 <OrderInfo />
               </Modal>
             }

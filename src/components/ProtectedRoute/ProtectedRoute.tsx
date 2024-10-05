@@ -29,7 +29,7 @@ export const ProtectedRoute = ({
   }
 
   if (isAuthenticated && notLoggedIn) {
-    return <Navigate to={location.state.from || '/'} replace />;
+    return <Navigate to={location.state?.from || '/'} replace />;
   }
 
   return children;
