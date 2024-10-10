@@ -1,7 +1,6 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from '../../services/store';
 import { Navigate, useLocation } from 'react-router-dom';
-import { RootState } from '../../services/store';
 import { selectIsInit } from '../../slices/storeSlice';
 import { Preloader } from '@ui';
 
@@ -16,9 +15,7 @@ export const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const location = useLocation();
   const isInit = useSelector(selectIsInit);
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.store.isAuthenticated
-  );
+  const isAuthenticated = useSelector((state) => state.store.isAuthenticated);
 
   if (!isInit) {
     return <Preloader />;

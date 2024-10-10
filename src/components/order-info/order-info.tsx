@@ -3,15 +3,27 @@ import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 import { useSelector } from '../../services/store';
-import { selectIngredients, selectOrders } from '../../slices/storeSlice';
-import { useParams } from 'react-router-dom';
+import {
+  selectIngredients,
+  selectOrders,
+  selectUserOrders
+} from '../../slices/storeSlice';
+import { useParams, redirect } from 'react-router-dom';
 
-export const OrderInfo: FC = () => {
+interface TOrderInfoProps {
+  personal?: boolean;
+}
+
+export const OrderInfo: FC<TOrderInfoProps> = ({ personal }) => {
   const params = useParams<{ number: string }>();
 
-  const orderData = useSelector(selectOrders).find(
-    (item) => item.number === parseInt(params.number!)
-  );
+  const orderData = useSelector(
+    personal ? selectUserOrders : selectOrders
+  ).find((item) => item.number === parseInt(params.number!));
+
+  if (!params.number) {
+    redirect('/feed');
+  }
 
   const ingredients: TIngredient[] = useSelector(selectIngredients);
 

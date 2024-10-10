@@ -12,7 +12,7 @@ import {
 import { Modal, OrderInfo, IngredientDetails } from '@components';
 import '../../index.css';
 import styles from './app.module.css';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@components';
 import { ProtectedRoute } from '../ProtectedRoute';
@@ -23,7 +23,8 @@ import {
   getUser,
   init,
   closeModal,
-  selectIsModalOpen
+  selectIsModalOpen,
+  setError
 } from '../../slices/storeSlice';
 import { useEffect } from 'react';
 import { getCookie, deleteCookie } from '../../utils/cookie';
@@ -31,6 +32,7 @@ import { useLocation } from 'react-router-dom';
 
 const App = () => {
   const dispatch = store.dispatch;
+  const navigate = useNavigate();
   const token = getCookie('accessToken');
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isModalOpen = useSelector(selectIsModalOpen);
@@ -58,6 +60,11 @@ const App = () => {
   useEffect(() => {
     dispatch(fetchIngredients());
   }, []);
+
+  const handleClose = () => {
+    dispatch(closeModal());
+    navigate(-1);
+  };
 
   return (
     <div className={styles.app}>
@@ -134,7 +141,7 @@ const App = () => {
               <Modal
                 title='Заказ'
                 onClose={() => {
-                  dispatch(closeModal());
+                  handleClose();
                 }}
               >
                 <OrderInfo />
@@ -147,7 +154,7 @@ const App = () => {
               <Modal
                 title='Детали ингредиента'
                 onClose={() => {
-                  dispatch(closeModal());
+                  handleClose();
                 }}
               >
                 <IngredientDetails />
@@ -161,10 +168,10 @@ const App = () => {
                 <Modal
                   title='Мой заказ'
                   onClose={() => {
-                    dispatch(closeModal());
+                    handleClose();
                   }}
                 >
-                  <OrderInfo />
+                  <OrderInfo personal />
                 </Modal>
               </ProtectedRoute>
             }

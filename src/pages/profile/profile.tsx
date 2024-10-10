@@ -9,6 +9,8 @@ import {
   setError
 } from '../../slices/storeSlice';
 import { useLocation } from 'react-router-dom';
+import { useForm } from '../../hooks/useForm';
+import { TUser } from '@utils-types';
 
 export const Profile: FC = () => {
   const user = useSelector(selectUser);
@@ -16,9 +18,9 @@ export const Profile: FC = () => {
   const location = useLocation();
   const error = useSelector(selectError);
 
-  const [formValue, setFormValue] = useState({
-    name: user.name,
-    email: user.email,
+  const { values, handleChange, setValues } = useForm({
+    name: user.name || '',
+    email: user.email || '',
     password: ''
   });
 
@@ -27,7 +29,7 @@ export const Profile: FC = () => {
   }, [location]);
 
   useEffect(() => {
-    setFormValue((prevState) => ({
+    setValues((prevState: TUser) => ({
       ...prevState,
       name: user?.name || '',
       email: user?.email || ''
@@ -35,43 +37,41 @@ export const Profile: FC = () => {
   }, [user]);
 
   const isFormChanged =
-    formValue.name !== user?.name ||
-    formValue.email !== user?.email ||
-    !!formValue.password;
+    values.name !== user?.name ||
+    values.email !== user?.email ||
+    !!values.password;
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(updateUser(formValue))
+    dispatch(updateUser(values))
       .unwrap()
       .then(() => {
         dispatch(getUser());
+        dispatch(setError(''));
       })
       .catch((err) => dispatch(setError(err.message)));
   };
 
   const handleCancel = (e: SyntheticEvent) => {
     e.preventDefault();
-    setFormValue({
+    setValues({
       name: user.name,
       email: user.email,
       password: ''
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormValue((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value
-    }));
-  };
+  useEffect(() => {
+    dispatch(setError(''));
+  }, [location]);
 
   return (
     <ProfileUI
-      formValue={formValue}
+      formValue={values}
       isFormChanged={isFormChanged}
       handleCancel={handleCancel}
       handleSubmit={handleSubmit}
-      handleInputChange={handleInputChange}
+      handleInputChange={handleChange}
       updateUserError={error}
     />
   );

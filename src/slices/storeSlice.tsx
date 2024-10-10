@@ -6,7 +6,6 @@ import {
   orderBurgerApi,
   getUserApi,
   registerUserApi,
-  TRegisterData,
   logoutApi,
   updateUserApi,
   loginUserApi,
@@ -64,45 +63,25 @@ const initialState: StoreState = {
 
 export const fetchIngredients = createAsyncThunk(
   'ingredients/getAll',
-  async () => getIngredientsApi()
+  getIngredientsApi
 );
 export const createNewOrder = createAsyncThunk(
   'orders/createOrder',
-  async (data: string[]) => orderBurgerApi(data)
+  orderBurgerApi
 );
-export const fetchUsersOrders = createAsyncThunk('user/orders', async () =>
-  getOrdersApi()
-);
-export const fetchFeed = createAsyncThunk('user/feed', async () =>
-  getFeedsApi()
-);
-
-export const getUser = createAsyncThunk('user/getUser', async () =>
-  getUserApi()
-);
-
-export const loginUser = createAsyncThunk(
-  'user/login',
-  async (data: { email: string; password: string }) =>
-    loginUserApi({ email: data.email, password: data.password })
-);
-
+export const fetchUsersOrders = createAsyncThunk('user/orders', getOrdersApi);
+export const fetchFeed = createAsyncThunk('user/feed', getFeedsApi);
+export const getUser = createAsyncThunk('user/getUser', getUserApi);
+export const loginUser = createAsyncThunk('user/login', loginUserApi);
 export const registerNewUser = createAsyncThunk(
   'user/register',
-  async (data: TRegisterData) => registerUserApi(data)
+  registerUserApi
 );
-
-export const logOutUser = createAsyncThunk('user/logout', async () => {
-  logoutApi();
-});
-
-export const updateUser = createAsyncThunk(
-  'user/update',
-  async (user: TRegisterData) => updateUserApi(user)
-);
+export const logOutUser = createAsyncThunk('user/logout', logoutApi);
+export const updateUser = createAsyncThunk('user/update', updateUserApi);
 export const resetPassword = createAsyncThunk(
   'user/resetPassword',
-  async (data: { password: string; token: string }) => resetPasswordApi(data)
+  resetPasswordApi
 );
 
 export const storeSlice = createSlice({
@@ -236,16 +215,15 @@ export const storeSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(loginUser.rejected, (state) => {
         state.isLoading = false;
-        state.error = action.error.message!;
       })
       .addCase(fetchUsersOrders.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(fetchUsersOrders.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.userOrders = action.payload;
+        state.userOrders = action.payload.orders;
       })
       .addCase(fetchUsersOrders.rejected, (state) => {
         state.isLoading = false;
@@ -259,7 +237,6 @@ export const storeSlice = createSlice({
       })
       .addCase(registerNewUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message!;
       })
       .addCase(logOutUser.pending, (state) => {
         state.isLoading = true;

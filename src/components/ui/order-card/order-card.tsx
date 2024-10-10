@@ -15,13 +15,16 @@ import { useDispatch } from '../../../services/store';
 export const OrderCardUI: FC<OrderCardUIProps> = memo(
   ({ orderInfo, maxIngredients, locationState }) => {
     const dispatch = useDispatch();
+    const onClick = () => {
+      dispatch(openModal());
+    };
     return (
       <Link
         to={orderInfo.number.toString()}
         relative='path'
         state={locationState}
         className={`p-6 mb-4 mr-2 ${styles.order}`}
-        onClick={() => dispatch(openModal())}
+        onClick={onClick}
       >
         <div className={styles.order_info}>
           <span className={`text text_type_digits-default ${styles.number}`}>
