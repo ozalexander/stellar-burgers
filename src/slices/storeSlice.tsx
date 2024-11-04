@@ -36,7 +36,7 @@ interface StoreState {
   error: string | undefined;
 }
 
-const initialState: StoreState = {
+export const initialState: StoreState = {
   isLoading: true,
   ingredients: [],
   constructorItems: {
@@ -171,7 +171,7 @@ export const storeSlice = createSlice({
       })
       .addCase(fetchIngredients.rejected, (state, action) => {
         state.isLoading = false;
-        console.error('Ошибка:', action.error);
+        state.error = action.error.message;
       })
       .addCase(createNewOrder.pending, (state) => {
         state.orderRequest = true;
@@ -179,9 +179,12 @@ export const storeSlice = createSlice({
       .addCase(createNewOrder.fulfilled, (state, action) => {
         state.orderRequest = false;
         state.orderModalData = action.payload.order;
+        state.isLoading = false;
       })
-      .addCase(createNewOrder.rejected, (state) => {
+      .addCase(createNewOrder.rejected, (state, action) => {
         state.orderRequest = false;
+        state.isLoading = false;
+        state.error = action.error.message;
       })
       .addCase(fetchFeed.pending, (state) => {
         state.isLoading = true;
@@ -192,8 +195,9 @@ export const storeSlice = createSlice({
         state.total = action.payload.total;
         state.totalToday = action.payload.totalToday;
       })
-      .addCase(fetchFeed.rejected, (state) => {
+      .addCase(fetchFeed.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.error.message;
       })
       .addCase(getUser.pending, (state) => {
         state.isLoading = true;
@@ -206,17 +210,19 @@ export const storeSlice = createSlice({
       })
       .addCase(getUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message!;
+        state.error = action.error.message;
       })
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(loginUser.fulfilled, (state) => {
+      .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
+        state.user = action.payload;
       })
-      .addCase(loginUser.rejected, (state) => {
+      .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.error.message;
       })
       .addCase(fetchUsersOrders.pending, (state) => {
         state.isLoading = true;
@@ -225,18 +231,21 @@ export const storeSlice = createSlice({
         state.isLoading = false;
         state.userOrders = action.payload.orders;
       })
-      .addCase(fetchUsersOrders.rejected, (state) => {
+      .addCase(fetchUsersOrders.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.error.message;
       })
       .addCase(registerNewUser.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(registerNewUser.fulfilled, (state) => {
+      .addCase(registerNewUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
+        state.user = action.payload;
       })
       .addCase(registerNewUser.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.error.message;
       })
       .addCase(logOutUser.pending, (state) => {
         state.isLoading = true;
@@ -246,8 +255,9 @@ export const storeSlice = createSlice({
         state.isAuthenticated = false;
         state.user = { name: '', email: '' };
       })
-      .addCase(logOutUser.rejected, (state) => {
+      .addCase(logOutUser.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.error.message;
       })
       .addCase(resetPassword.pending, (state) => {
         state.isLoading = true;
@@ -257,7 +267,18 @@ export const storeSlice = createSlice({
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message!;
+        state.error = action.error.message;
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message;
       });
   }
 });
